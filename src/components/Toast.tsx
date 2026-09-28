@@ -1,0 +1,5 @@
+import { useEffect, useState } from 'react';
+import { CheckCircle2, AlertCircle, X } from 'lucide-react';
+export type ToastDetail={message:string;type?:'success'|'error'};
+export const notify=(message:string,type:'success'|'error'='success')=>window.dispatchEvent(new CustomEvent<ToastDetail>('app-toast',{detail:{message,type}}));
+export function ToastViewport(){const [items,setItems]=useState<Array<ToastDetail&{id:number}>>([]);useEffect(()=>{const listener=(event:Event)=>{const detail=(event as CustomEvent<ToastDetail>).detail,id=Date.now();setItems(v=>[...v,{...detail,id}]);setTimeout(()=>setItems(v=>v.filter(x=>x.id!==id)),3500)};window.addEventListener('app-toast',listener);return()=>window.removeEventListener('app-toast',listener)},[]);return <div className="toast-viewport" aria-live="polite">{items.map(item=><div className={`toast ${item.type||'success'}`} key={item.id}>{item.type==='error'?<AlertCircle/>:<CheckCircle2/>}<span>{item.message}</span><button aria-label="Benachrichtigung schließen" onClick={()=>setItems(v=>v.filter(x=>x.id!==item.id))}><X/></button></div>)}</div>}
