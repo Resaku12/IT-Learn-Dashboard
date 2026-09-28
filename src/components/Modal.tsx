@@ -1,0 +1,3 @@
+import { X } from 'lucide-react';import type { ReactNode } from 'react';
+export function Modal({title,onClose,children}:{title:string;onClose:()=>void;children:ReactNode}){return <div className="overlay" role="presentation" onMouseDown={e=>e.target===e.currentTarget&&onClose()}><section className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><header><h2 id="modal-title">{title}</h2><button className="icon" onClick={onClose} aria-label="Schließen"><X/></button></header>{children}</section></div>}
+export function Field({label,children}:{label:string;children:ReactNode}){return <label className="field"><span>{label}</span>{children}</label>}
