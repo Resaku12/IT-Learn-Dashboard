@@ -5,6 +5,7 @@ import type { ConfigurationData } from '../types';
 import { Card, Empty, Badge } from '../components/UI';
 import { Field, Modal } from '../components/Modal';
 import { Page } from './Resources';
+import { notify } from '../components/Toast';
 
 const tabs=[['personal','Ausbildung'],['subjects','Fächer'],['teachers','Lehrer'],['learning_fields','Lernfelder'],['departments','Abteilungen'],['contacts','Ansprechpartner'],['training_years','Ausbildungsjahre']] as const;
 const empty:ConfigurationData={configuration:{id:1,profession:'Fachinformatiker für Systemintegration',workdays:'1,2,3,4,5'},subjects:[],teachers:[],teacherSubjects:[],learningFields:[],learningFieldSubjects:[],departments:[],contacts:[],trainingYears:[]};
@@ -17,11 +18,11 @@ export function ConfigurationPage(){
   async function save(resource:string,payload:Record<string,unknown>,item?:any,relations?:number[]){
     const saved:any=item?.id?await api.update(resource,item.id,payload):await api.create(resource,payload);
     if(relations)await api.saveRelations(resource==='teachers'?'teacher-subjects':'learning-field-subjects',saved.id,relations);
-    setModal(null);await load();
+    setModal(null);notify('Stammdaten gespeichert');await load();
   }
-  async function remove(resource:string,id:number){if(confirm('Eintrag wirklich löschen?')){try{await api.remove(resource,id);await load()}catch(e){alert(e instanceof Error?e.message:'Löschen fehlgeschlagen.')}}}
+  async function remove(resource:string,id:number){if(confirm('Eintrag wirklich löschen?')){try{await api.remove(resource,id);notify('Eintrag gelöscht');await load()}catch(e){alert(e instanceof Error?e.message:'Löschen fehlgeschlagen.')}}}
   if(busy)return <Page title="Grundkonfiguration" subtitle="Zentrale Stammdaten werden geladen …"><Card><p>Laden …</p></Card></Page>;
-  return <Page title="Grundkonfiguration" subtitle="Einmal pflegen, überall in deiner Ausbildung verwenden">
+  return <Page title="Grundkonfiguration" subtitle="Verwalte die zentralen Daten deiner Ausbildung.">
     {error&&<p className="error">{error}</p>}
     <div className="config-tabs" role="tablist">{tabs.map(([id,label])=><button role="tab" aria-selected={tab===id} className={tab===id?'active':''} onClick={()=>setTab(id)} key={id}>{label}</button>)}</div>
     {tab==='personal'&&<PersonalForm value={data.configuration} onSave={async payload=>{await api.saveConfiguration(payload);await load()}}/>}

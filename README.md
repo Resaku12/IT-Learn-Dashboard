@@ -73,11 +73,11 @@ Die Konfiguration bindet diesen privaten Bucket unter dem Namen `FILES` an den W
 
 6. Speichere und starte das erste Deployment.
 
-Der Deploy-Befehl wendet zuerst alle noch nicht ausgeführten Dateien aus `migrations/` auf D1 an und veröffentlicht danach den Worker. Bei späteren Updates reicht ein Merge oder Push nach `main`; Cloudflare baut, migriert und veröffentlicht automatisch.
+Der Deploy-Befehl veröffentlicht den Worker. D1-Migrationen werden bewusst über die browserbasierte D1-Konsole ausgeführt, weil bereits manuell eingerichtete Datenbanken kein Wrangler-Migrationsjournal besitzen. Bei späteren Updates reicht nach dem einmaligen Ausführen einer neuen SQL-Datei ein Merge oder Push nach `main`; Cloudflare baut und veröffentlicht automatisch.
 
-## 6. Falls die automatische Migration beim ersten Build nicht klappt
+## 6. Datenbank beim ersten Deployment einrichten
 
-Die Migrationen lassen sich vollständig im Browser ausführen:
+Die Migrationen werden vollständig im Browser ausgeführt:
 
 1. Öffne **Storage & Databases → D1 → ausbildungszentrale → Console**.
 2. Öffne parallel auf GitHub `migrations/0001_initial.sql`, kopiere den gesamten Inhalt in die D1-Konsole und klicke auf **Execute**.
@@ -85,7 +85,7 @@ Die Migrationen lassen sich vollständig im Browser ausführen:
 4. Ändere in den Cloudflare-Build-Einstellungen den **Deploy command** auf `npx wrangler deploy`, damit die bereits manuell ausgeführten SQL-Dateien nicht erneut angewendet werden.
 5. Starte danach unter **Workers & Pages → ausbildungszentrale → Deployments** über **Retry deployment** einen neuen Build.
 
-Führe die Demo-Migration nicht mehrfach manuell aus. Wenn du diesen Fallback verwendest, führst du auch künftige neue SQL-Dateien einmalig über die D1-Konsole aus. Der bevorzugte automatische Weg mit `npm run deploy:cloudflare` führt jede Migration dagegen nur einmal aus.
+Führe die Demo-Migration nicht mehrfach manuell aus. Wenn du diesen Fallback verwendest, führst du auch künftige neue SQL-Dateien einmalig über die D1-Konsole aus. Neue Migrationen werden bei dieser Installation jeweils einmalig über die D1-Konsole ausgeführt. Dadurch versucht Wrangler nicht, die bereits vorhandenen Tabellen erneut anzulegen.
 
 ## 7. Anwendung privat schützen
 
@@ -149,7 +149,7 @@ Dateien werden mit sicher erzeugten Objekt-IDs im privaten R2-Bucket `ausbildung
 
 ### Einmaliges Update im Cloudflare-Web-Dashboard
 
-Beim bevorzugten Deploy-Befehl `npm run deploy:cloudflare` wird `migrations/0003_master_data_and_files.sql` automatisch und ohne Datenverlust angewendet. Falls dein Cloudflare-Projekt weiterhin nur `npx wrangler deploy` verwendet:
+Die bestehende Datenbank wurde bereits über die D1-Webkonsole eingerichtet. Führe deshalb die neue additive Migration einmalig im Browser aus; der Deploy-Befehl veröffentlicht danach nur den Worker:
 
 1. Öffne **Storage & Databases → D1 → ausbildungszentrale → Console**.
 2. Öffne in GitHub `migrations/0003_master_data_and_files.sql`, wähle **Raw**, kopiere alles in die Konsole und klicke genau einmal auf **Execute**.

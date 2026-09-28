@@ -1,5 +1,12 @@
-import type { ReactNode } from 'react';
+import type { ButtonHTMLAttributes, ReactNode } from 'react';
+
 export function Card({children,className=''}:{children:ReactNode;className?:string}){return <section className={`card ${className}`}>{children}</section>}
-export function Progress({value}:{value:number}){return <div className="progress" aria-label={`${value}%`}><span style={{width:`${Math.min(100,Math.max(0,value))}%`}}/></div>}
-export function Empty({title,action}:{title:string;action?:ReactNode}){return <div className="empty"><div className="empty-icon">✦</div><b>{title}</b><p>Lege deinen ersten Eintrag an und starte durch.</p>{action}</div>}
+export function Progress({value}:{value:number}){const safe=Math.min(100,Math.max(0,value));return <div className="progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={safe}><span style={{width:`${safe}%`}}/></div>}
+export function Empty({title,description='Lege deinen ersten Eintrag an und starte durch.',action}:{title:string;description?:string;action?:ReactNode}){return <div className="empty"><div className="empty-icon" aria-hidden="true">✦</div><b>{title}</b><p>{description}</p>{action}</div>}
 export function Badge({children,tone='neutral'}:{children:ReactNode;tone?:string}){return <span className={`badge ${tone}`}>{children}</span>}
+export function Button({variant='secondary',size='default',className='',children,...props}:ButtonHTMLAttributes<HTMLButtonElement>&{variant?:'primary'|'secondary'|'ghost'|'danger';size?:'small'|'default';children:ReactNode}){return <button className={`btn btn-${variant} btn-${size} ${className}`} {...props}>{children}</button>}
+export function Tabs({items,value,onChange,label}:{items:Array<{value:string;label:string;count?:number}>;value:string;onChange:(value:string)=>void;label:string}){return <div className="tabs-ui" role="tablist" aria-label={label}>{items.map(item=><button role="tab" aria-selected={value===item.value} className={value===item.value?'active':''} onClick={()=>onChange(item.value)} key={item.value}>{item.label}{item.count!==undefined&&<span>{item.count}</span>}</button>)}</div>}
+export function Skeleton({lines=3}:{lines?:number}){return <div className="skeleton" aria-label="Inhalte werden geladen">{Array.from({length:lines},(_,i)=><span key={i}/>)}</div>}
+export function PageHeader({title,subtitle,eyebrow,action}:{title:string;subtitle?:string;eyebrow?:string;action?:ReactNode}){return <header className="page-header"><div>{eyebrow&&<span className="eyebrow">{eyebrow}</span>}<h1>{title}</h1>{subtitle&&<p>{subtitle}</p>}</div>{action&&<div className="page-actions">{action}</div>}</header>}
+export function SectionHeader({title,subtitle,action}:{title:string;subtitle?:string;action?:ReactNode}){return <div className="section-header"><div><h2>{title}</h2>{subtitle&&<p>{subtitle}</p>}</div>{action}</div>}
+export function Tooltip({label,children}:{label:string;children:ReactNode}){return <span className="tooltip" data-tooltip={label}>{children}</span>}

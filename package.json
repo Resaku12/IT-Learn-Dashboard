@@ -11,7 +11,7 @@
     "typecheck": "tsc -b --pretty false",
     "check": "npm run typecheck && npm test && npm run build",
     "deploy": "npm run build && wrangler deploy",
-    "deploy:cloudflare": "wrangler d1 migrations apply ausbildungszentrale --remote && wrangler deploy",
+    "deploy:cloudflare": "wrangler deploy",
     "db:migrate:local": "wrangler d1 migrations apply ausbildungszentrale --local",
     "db:migrate:remote": "wrangler d1 migrations apply ausbildungszentrale --remote"
   },
