@@ -77,3 +77,16 @@ Das Ergebnis sollte größer als `0` sein. Ist es `0`, führe im Browser nachein
 ### Ein Update ist noch nicht sichtbar
 
 Öffne **Workers & Pages → ausbildungszentrale → Deployments**. Kontrolliere den letzten Build und starte ihn bei Bedarf über **Retry deployment** erneut. Danach die Anwendung im Browser mit **Strg+F5** neu laden.
+
+## D1-Fehler direkt nach dem ersten Deployment beheben
+
+Wenn unter **Observability → Logs** ein Fehler mit `D1DatabaseSessionAlwaysPrimary` beim Aufruf von `/api/dashboard` erscheint, ist das D1-Binding erreichbar, aber mindestens eine benötigte Tabelle fehlt. Das ist kein Frontend-Fehler.
+
+1. Öffne **Storage & Databases → D1 → ausbildungszentrale → Console**.
+2. Öffne auf GitHub die Datei `migrations/0001_initial.sql`, wähle **Raw**, kopiere den gesamten Inhalt in die D1-Konsole und klicke auf **Execute**.
+3. Warte auf die Erfolgsmeldung.
+4. Wiederhole den Vorgang mit `migrations/0002_demo.sql`.
+5. Öffne anschließend `https://<deine-worker-adresse>/api/health`. Erwartet wird `{"ok":true,"database":"ready",...}`.
+6. Lade das Dashboard mit **Strg+F5** neu.
+
+Falls bereits beim ersten Skript `table ... already exists` erscheint, wurde das Schema schon teilweise angelegt. Führe dann in der D1-Konsole `SELECT name FROM sqlite_schema WHERE type = 'table' ORDER BY name;` aus und vergleiche die Ausgabe mit `0001_initial.sql`, bevor du einzelne fehlende `CREATE TABLE`-Anweisungen ausführst. Die Demo-Datei darf nur einmal ausgeführt werden, da sie absichtlich echte Beispieldatensätze einfügt.

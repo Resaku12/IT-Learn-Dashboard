@@ -140,3 +140,25 @@ Produktions- und lokale D1-Daten sind strikt getrennt. Lokale Daten liegen unter
 ## Datenmodell
 
 Die versionierten Migrationen liegen unter `migrations/`. Fächer verbinden Themen; Themen verbinden Lernzettel, Karteikarten, Quizfragen, Dateien, Unterricht, Aufgaben und Termine. Aktivitäten referenzieren Abteilungen und können später in das Berichtsheft übernommen werden. `is_demo = 1` kennzeichnet Beispieldaten eindeutig.
+
+## Erweiterung: Grundkonfiguration und echte Dateiablage
+
+Der Hauptbereich **Grundkonfiguration** speichert persönliche Ausbildungsdaten, Fächer, Lehrer und deren Fachzuordnungen, Lernfelder, Abteilungen, betriebliche Ansprechpartner sowie Ausbildungsjahre zentral in D1. Aufgaben, Termine, Lernzettel, Karteikarten und Datei-Uploads verwenden diese Stammdaten bereits als Auswahl.
+
+Dateien werden mit sicher erzeugten Objekt-IDs im privaten R2-Bucket `ausbildungszentrale-files` gespeichert. D1 enthält ausschließlich Metadaten und Verknüpfungen. Unterstützt werden PDF, PNG, JPEG, DOCX, XLSX, PPTX, TXT und Markdown bis 20 MB. MIME-Type, Dateisignatur und Größe werden serverseitig geprüft.
+
+### Einmaliges Update im Cloudflare-Web-Dashboard
+
+Beim bevorzugten Deploy-Befehl `npm run deploy:cloudflare` wird `migrations/0003_master_data_and_files.sql` automatisch und ohne Datenverlust angewendet. Falls dein Cloudflare-Projekt weiterhin nur `npx wrangler deploy` verwendet:
+
+1. Öffne **Storage & Databases → D1 → ausbildungszentrale → Console**.
+2. Öffne in GitHub `migrations/0003_master_data_and_files.sql`, wähle **Raw**, kopiere alles in die Konsole und klicke genau einmal auf **Execute**.
+3. Öffne **Workers & Pages → it-learn-dashboard → Settings → Bindings**.
+4. Kontrolliere das R2-Binding: Variablenname `FILES`, Bucket `ausbildungszentrale-files`. Lege den Bucket unter **R2 Object Storage → Create bucket** an, falls er noch fehlt.
+5. Starte unter **Deployments** einen neuen Build und lade anschließend die Anwendung neu.
+
+### Aktueller Integrationsstand
+
+Bereits an zentrale Stammdaten angebunden sind die Auswahlfelder für Aufgaben, Termine, Lernzettel, Karteikarten und Dateien. Die Dateiverwaltung speichert Uploads real in R2 und Metadaten in D1.
+
+Als nächste fachliche Ausbaustufe sollten die bisher überwiegend lesenden Ansichten **Berufsschule**, **Ausbildung** und **Berichtsheft** vollständige Erstellen-/Bearbeiten-Dialoge erhalten. Außerdem sollte die Themenseite zu einer eigenen Detailroute mit Tabs für Lernzettel, Karteikarten, Quiz und automatisch gefilterte Dateien ausgebaut werden. Die Datenbankbeziehungen dafür sind vorbereitet; bestehende Daten bleiben erhalten.

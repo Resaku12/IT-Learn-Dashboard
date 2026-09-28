@@ -1,0 +1,4 @@
+export const MAX_FILE_SIZE = 20 * 1024 * 1024;
+export const supportedFileTypes = new Set(['application/pdf','image/png','image/jpeg','text/plain','text/markdown','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','application/vnd.openxmlformats-officedocument.presentationml.presentation']);
+export function formatFileSize(bytes:number){return bytes<1024?`${bytes} B`:bytes<1048576?`${(bytes/1024).toFixed(1)} KB`:`${(bytes/1048576).toFixed(1)} MB`}
+export function fileTypeLabel(type:string){return type==='application/pdf'?'PDF':type==='image/png'?'PNG':type==='image/jpeg'?'JPEG':type.includes('wordprocessing')?'DOCX':type.includes('spreadsheet')?'XLSX':type.includes('presentation')?'PPTX':type==='text/markdown'?'Markdown':'Textdatei'}
