@@ -4,7 +4,7 @@
   "main": "worker/index.ts",
   "compatibility_date": "2026-09-01",
   "assets": { "directory": "./dist", "binding": "ASSETS", "not_found_handling": "single-page-application" },
-  "d1_databases": [{ "binding": "DB", "database_name": "ausbildungszentrale", "database_id": "D1_DATABASE_ID", "migrations_dir": "migrations" }],
+  "d1_databases": [{ "binding": "DB", "database_name": "ausbildungszentrale", "database_id": "4ee34b91-38b8-48a2-b2bf-2ae9badd45ea", "migrations_dir": "migrations" }],
   "r2_buckets": [{ "binding": "FILES", "bucket_name": "ausbildungszentrale-files" }],
   "vars": { "APP_ENV": "production" }
 }
