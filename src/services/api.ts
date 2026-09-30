@@ -12,6 +12,7 @@ export const api={
   create:<T>(resource:string,data:unknown)=>request<T>(`/api/${resource}`,{method:'POST',headers,body:JSON.stringify(data)}),
   update:<T>(resource:string,id:number,data:unknown)=>request<T>(`/api/${resource}/${id}`,{method:'PUT',headers,body:JSON.stringify(data)}),
   remove:(resource:string,id:number)=>request<{ok:boolean}>(`/api/${resource}/${id}`,{method:'DELETE'}),
+  removeDemoData:()=>request<{ok:boolean;deleted:number}>('/api/demo-data',{method:'DELETE'}),
   saveRelations:(type:string,id:number,ids:number[])=>request(`/api/relations/${type}/${id}`,{method:'PUT',headers,body:JSON.stringify({ids})}),
   files:(query='')=>request<StoredFile[]>(`/api/files${query?'?'+query:''}`),
   updateFile:(id:number,data:unknown)=>request<StoredFile>(`/api/files/${id}`,{method:'PUT',headers,body:JSON.stringify(data)}),

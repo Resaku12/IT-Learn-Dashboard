@@ -162,3 +162,9 @@ Die bestehende Datenbank wurde bereits über die D1-Webkonsole eingerichtet. Fü
 Bereits an zentrale Stammdaten angebunden sind die Auswahlfelder für Aufgaben, Termine, Lernzettel, Karteikarten und Dateien. Die Dateiverwaltung speichert Uploads real in R2 und Metadaten in D1.
 
 Als nächste fachliche Ausbaustufe sollten die bisher überwiegend lesenden Ansichten **Berufsschule**, **Ausbildung** und **Berichtsheft** vollständige Erstellen-/Bearbeiten-Dialoge erhalten. Außerdem sollte die Themenseite zu einer eigenen Detailroute mit Tabs für Lernzettel, Karteikarten, Quiz und automatisch gefilterte Dateien ausgebaut werden. Die Datenbankbeziehungen dafür sind vorbereitet; bestehende Daten bleiben erhalten.
+
+## Wo werden meine Daten gespeichert?
+
+In der veröffentlichten Cloudflare-Anwendung werden strukturierte Inhalte wie Aufgaben, Fächer, Themen, Lernzettel, Stammdaten und Dateiverknüpfungen zentral in **Cloudflare D1** gespeichert. Hochgeladene Binärdateien liegen im privaten **Cloudflare R2**-Bucket; D1 enthält dazu nur Metadaten und Zuordnungen. Deshalb sind die Daten nach einem Neuladen und auf jedem Gerät verfügbar, das dieselbe geschützte Worker-Adresse verwendet. Lediglich die Darstellungspräferenz (Light, Dark oder System) wird im jeweiligen Browser gespeichert.
+
+Die Aktion **Demo-Daten löschen** entfernt ausschließlich als Demo markierte Datensätze. Selbst angelegte Inhalte werden bewahrt. Wenn eigene Inhalte auf einem ursprünglich als Demo markierten Fach, Thema oder einer Abteilung aufbauen, bleibt dieser Stammdatensatz erhalten und wird aus dem Demo-Status übernommen.

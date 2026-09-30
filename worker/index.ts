@@ -174,6 +174,35 @@ app.delete('/api/files/:id', async c => {
   return c.json({ ok: true });
 });
 
+app.delete('/api/demo-data', async c => {
+  const tables = ['activities','grades','lessons','flashcards','notes','tasks','events'] as const;
+  const statements = tables.map(table => c.env.DB.prepare(`DELETE FROM ${table} WHERE is_demo=1`));
+  statements.push(c.env.DB.prepare(`DELETE FROM topics WHERE is_demo=1
+    AND NOT EXISTS (SELECT 1 FROM notes WHERE topic_id=topics.id)
+    AND NOT EXISTS (SELECT 1 FROM flashcards WHERE topic_id=topics.id)
+    AND NOT EXISTS (SELECT 1 FROM quiz_questions WHERE topic_id=topics.id)
+    AND NOT EXISTS (SELECT 1 FROM tasks WHERE topic_id=topics.id)
+    AND NOT EXISTS (SELECT 1 FROM events WHERE topic_id=topics.id)
+    AND NOT EXISTS (SELECT 1 FROM lessons WHERE topic_id=topics.id)
+    AND NOT EXISTS (SELECT 1 FROM files WHERE topic_id=topics.id)`));
+  statements.push(c.env.DB.prepare(`UPDATE topics SET is_demo=0 WHERE is_demo=1`));
+  statements.push(c.env.DB.prepare(`DELETE FROM departments WHERE is_demo=1 AND NOT EXISTS (SELECT 1 FROM activities WHERE department_id=departments.id) AND NOT EXISTS (SELECT 1 FROM contacts WHERE department_id=departments.id)`));
+  statements.push(c.env.DB.prepare(`UPDATE departments SET is_demo=0 WHERE is_demo=1`));
+  statements.push(c.env.DB.prepare(`DELETE FROM subjects WHERE is_demo=1
+    AND NOT EXISTS (SELECT 1 FROM topics WHERE subject_id=subjects.id)
+    AND NOT EXISTS (SELECT 1 FROM tasks WHERE subject_id=subjects.id)
+    AND NOT EXISTS (SELECT 1 FROM events WHERE subject_id=subjects.id)
+    AND NOT EXISTS (SELECT 1 FROM grades WHERE subject_id=subjects.id)
+    AND NOT EXISTS (SELECT 1 FROM lessons WHERE subject_id=subjects.id)
+    AND NOT EXISTS (SELECT 1 FROM files WHERE subject_id=subjects.id)
+    AND NOT EXISTS (SELECT 1 FROM teacher_subjects WHERE subject_id=subjects.id)
+    AND NOT EXISTS (SELECT 1 FROM learning_field_subjects WHERE subject_id=subjects.id)`));
+  statements.push(c.env.DB.prepare(`UPDATE subjects SET is_demo=0 WHERE is_demo=1`));
+  const results = await c.env.DB.batch(statements);
+  const deleted = results.reduce((sum, result) => sum + (result.meta.changes || 0), 0);
+  return c.json({ ok: true, deleted });
+});
+
 app.post('/api/:resource', async c => {
   const resource = c.req.param('resource');
   if (!isResource(resource)) return c.json({ error: 'Unbekannter Bereich.' }, 404);
