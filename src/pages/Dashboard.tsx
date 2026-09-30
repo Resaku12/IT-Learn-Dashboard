@@ -1,0 +1,30 @@
+import { BookOpen, CalendarDays, CheckCircle2, Clock3, FileText, Plus, Target, Trophy, ArrowUpRight } from 'lucide-react';
+import type { Dashboard as Data } from '../types';
+import { Card, Progress, Badge, Empty, PageHeader, SectionHeader } from '../components/UI';
+import { daysUntil, germanDate, isoToday, statusWeight, weekNumber } from '../utils/date';
+
+export function Dashboard({data,onAction,onToggle}:{data:Data;onAction:(key:string)=>void;onToggle:(id:number,status:string)=>void}){
+  const today=isoToday(),open=data.tasks.filter(task=>task.status!=='done'),overdue=open.filter(task=>task.due_date<today);
+  const upcoming=[...data.events].filter(event=>event.event_date>=today).sort((a,b)=>a.event_date.localeCompare(b.event_date));
+  const exam=upcoming.find(event=>event.type==='Klausur');
+  const progress=data.topics.length?Math.round(data.topics.reduce((sum,topic)=>sum+statusWeight[topic.status],0)/data.topics.length):0;
+  const subjects=data.subjects.map(subject=>{const topics=data.topics.filter(topic=>topic.subject_id===subject.id);return {...subject,count:topics.length,progress:topics.length?Math.round(topics.reduce((sum,topic)=>sum+statusWeight[topic.status],0)/topics.length):0}});
+  const greeting=new Date().getHours()<11?'Guten Morgen':new Date().getHours()<18?'Guten Tag':'Guten Abend';
+  return <div className="dashboard-page">
+    <PageHeader eyebrow="DEIN LERNCOCKPIT" title={greeting} subtitle="Hier ist dein Überblick für heute." action={<div className="streak"><Trophy/><span><b>Fokus behalten</b><small>Ein Schritt nach dem anderen</small></span></div>}/>
+    <div className="kpi-grid">
+      <Card className="kpi"><div className="kpi-top"><span>Nächste Prüfung</span><div className="kpi-icon purple"><CalendarDays/></div></div><h3>{exam?.title||'Keine geplant'}</h3><p>{exam?`${germanDate(exam.event_date)} · noch ${daysUntil(exam.event_date)} Tage`:'Du hast aktuell Luft'}</p></Card>
+      <Card className="kpi"><div className="kpi-top"><span>Offene Aufgaben</span><div className="kpi-icon orange"><CheckCircle2/></div></div><div className="metric-line"><h3>{open.length}</h3><small>{open.filter(task=>task.due_date===today).length} heute</small></div><p className={overdue.length?'danger-text':''}>{overdue.length} überfällig</p></Card>
+      <Card className="kpi"><div className="kpi-top"><span>Lernfortschritt</span><div className="kpi-icon green"><Target/></div></div><div className="metric-line"><h3>{progress}%</h3><small>{data.topics.filter(topic=>topic.status==='confident').length} Themen sicher</small></div><Progress value={progress}/></Card>
+      <Card className="kpi"><div className="kpi-top"><span>Berichtsheft</span><div className="kpi-icon blue"><FileText/></div></div><h3>KW {weekNumber()}</h3><p>{5-data.trainingEntries.length>0?`Noch ${Math.max(0,5-data.trainingEntries.length)} Tage offen`:'Woche vollständig'}</p></Card>
+    </div>
+    <div className="quick"><b>Schnell hinzufügen</b>{[['notes','Lernzettel'],['tasks','Aufgabe'],['topics','Thema'],['flashcards','Karteikarte'],['training','Berichtsheft'],['events','Termin']].map(([key,label])=><button key={key} onClick={()=>onAction(key)}><Plus/> {label}</button>)}</div>
+    <div className="dashboard-layout">
+      <Card className="today-panel"><SectionHeader title="Heute" subtitle={`${open.filter(task=>task.due_date<=today).length} Aufgaben brauchen deine Aufmerksamkeit`}/><div className="task-list">{open.filter(task=>task.due_date<=today).slice(0,6).map(task=><label className="task-row" key={task.id}><input type="checkbox" onChange={()=>onToggle(task.id,'done')}/><span><b>{task.title}</b><small>{task.category} · {task.due_date<today?'Überfällig':germanDate(task.due_date)}</small></span><Badge tone={task.priority}>{task.priority==='urgent'?'Dringend':task.priority==='high'?'Hoch':'Normal'}</Badge></label>)}{!open.filter(task=>task.due_date<=today).length&&<Empty title="Für heute ist alles erledigt" description="Genieße den freien Kopf oder starte eine Lerneinheit."/>}</div></Card>
+      <Card className="learning-panel"><SectionHeader title="Lernfortschritt" subtitle="Nach Fach"/>{subjects.slice(0,6).map(subject=><div className="subject-progress" key={subject.id}><div><b>{subject.name}</b><span>{subject.progress}%</span></div><Progress value={subject.progress}/><small>{subject.count} Themen</small></div>)}</Card>
+      <Card className="recent-panel"><SectionHeader title="Zuletzt bearbeitet" subtitle="Deine letzten Inhalte"/><div className="recent-grid">{data.notes.slice(0,3).map(note=><div className="recent" key={note.id}><div className="doc-icon"><BookOpen/></div><div><b>{note.title}</b><small>Lernzettel · {note.updated_at?.slice(0,10)}</small></div></div>)}{data.topics.slice(0,2).map(topic=><div className="recent" key={`topic-${topic.id}`}><div className="doc-icon topic"><Clock3/></div><div><b>{topic.title}</b><small>Thema · kürzlich</small></div></div>)}</div></Card>
+      <Card className="events-panel"><SectionHeader title="Nächste Termine" subtitle="Was als Nächstes ansteht" action={<button className="icon" onClick={()=>onAction('events')} aria-label="Termin hinzufügen"><Plus/></button>}/>{upcoming.slice(0,4).map(event=><div className="event-row" key={event.id}><div className="datebox"><b>{new Date(event.event_date+'T12:00:00').getDate()}</b><small>{new Intl.DateTimeFormat('de-DE',{month:'short'}).format(new Date(event.event_date+'T12:00:00'))}</small></div><div className="grow"><b>{event.title}</b><small>{event.type}</small></div><ArrowUpRight/></div>)}{!upcoming.length&&<Empty title="Keine Termine geplant" description="Lege eine Klausur, Abgabe oder ein Lernziel an."/>}</Card>
+      <Card className="areas-panel"><SectionHeader title="Aktuelle Lernbereiche" subtitle="Deine aktivsten Fächer"/><div className="area-chips">{subjects.filter(subject=>subject.count).slice(0,6).map(subject=><div key={subject.id}><span className="subject-dot" style={{background:subject.color}}/><b>{subject.name}</b><small>{subject.count} Themen · {subject.progress}%</small></div>)}</div></Card>
+    </div>
+  </div>
+}
